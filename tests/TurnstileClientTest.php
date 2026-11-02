@@ -167,6 +167,27 @@ it('checks the expected hostname and action', function (
         false,
         ['invalid-input-response'],
     ],
+    'testing secret key' => [
+        'example.org',
+        'login',
+        '{"success":true,"hostname":"example.com","metadata":{"result_with_testing_key":true}}',
+        true,
+        [],
+    ],
+    'explicitly not a testing secret key' => [
+        'example.org',
+        'login',
+        '{"success":true,"hostname":"example.com","metadata":{"result_with_testing_key":false}}',
+        false,
+        ['hostname-mismatch', 'action-mismatch'],
+    ],
+    'failed verification with a testing secret key' => [
+        'example.org',
+        'login',
+        '{"success":false,"error-codes":["invalid-input-response"],"metadata":{"result_with_testing_key":true}}',
+        false,
+        ['invalid-input-response'],
+    ],
 ]);
 
 it('keeps the original instance unchanged when setting expectations', function (): void {

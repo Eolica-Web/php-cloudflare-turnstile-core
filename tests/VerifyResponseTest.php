@@ -24,7 +24,9 @@ it('can be constructed with only the success flag', function (): void {
         ->and($response->cdata)
         ->toBeNull()
         ->and($response->ephemeralId)
-        ->toBeNull();
+        ->toBeNull()
+        ->and($response->resultWithTestingKey)
+        ->toBeFalse();
 });
 
 it('parses a successful response', function (): void {
@@ -51,7 +53,21 @@ it('parses a successful response', function (): void {
         ->and($response->cdata)
         ->toBe('session-id-123')
         ->and($response->ephemeralId)
-        ->toBe('x:9f78e0ed210960d7693b167e');
+        ->toBe('x:9f78e0ed210960d7693b167e')
+        ->and($response->resultWithTestingKey)
+        ->toBeFalse();
+});
+
+it('parses a response issued with a testing secret key', function (): void {
+    $response = VerifyResponse::fromArray([
+        'success' => true,
+        'challenge_ts' => '2026-11-02T11:36:56.345Z',
+        'hostname' => 'example.com',
+        'error-codes' => [],
+        'metadata' => ['result_with_testing_key' => true],
+    ]);
+
+    expect($response->resultWithTestingKey)->toBeTrue();
 });
 
 it('parses a failed response with only the required fields', function (): void {
@@ -73,7 +89,9 @@ it('parses a failed response with only the required fields', function (): void {
         ->and($response->cdata)
         ->toBeNull()
         ->and($response->ephemeralId)
-        ->toBeNull();
+        ->toBeNull()
+        ->and($response->resultWithTestingKey)
+        ->toBeFalse();
 });
 
 it('keeps unknown error codes', function (): void {
@@ -127,4 +145,8 @@ it('rejects malformed responses', function (array $data, string $field): void {
     ],
     'non-array metadata' => [['success' => true, 'metadata' => 'x'], 'metadata'],
     'non-string ephemeral id' => [['success' => true, 'metadata' => ['ephemeral_id' => 1]], 'metadata.ephemeral_id'],
+    'non-boolean testing key flag' => [
+        ['success' => true, 'metadata' => ['result_with_testing_key' => 'true']],
+        'metadata.result_with_testing_key',
+    ],
 ]);

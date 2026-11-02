@@ -86,21 +86,22 @@ $response = $turnstile
 
 `withExpectedHostname()` and `withExpectedAction()` return a new instance, so you can configure the hostname once and set a different action for each form. Pass `null` to remove an expectation. Both can also be passed to the constructor as `expectedHostname` and `expectedAction`.
 
-They are only checked when Cloudflare reports a successful verification.
+They are only checked when Cloudflare reports a successful verification, and never with the [test secret keys](#testing), whose responses don't include the action and always report `example.com` as the hostname.
 
 ### The response
 
 `verify()` returns a `VerifyResponse` with the following properties:
 
-| Property       | Type                 | Description                                                     |
-|----------------|----------------------|-----------------------------------------------------------------|
-| `success`      | `bool`               | Whether the token is valid and matches the expectations         |
-| `errorCodes`   | `list<string>`       | Error codes, including unknown ones Cloudflare might add        |
-| `challengedAt` | `?DateTimeImmutable` | When the challenge was solved                                   |
-| `hostname`     | `?string`            | Hostname of the site where the challenge was solved             |
-| `action`       | `?string`            | Action configured in the widget                                 |
-| `cdata`        | `?string`            | Custom data configured in the widget                            |
-| `ephemeralId`  | `?string`            | Device identifier, only available for Enterprise customers      |
+| Property               | Type                 | Description                                                |
+|------------------------|----------------------|------------------------------------------------------------|
+| `success`              | `bool`               | Whether the token is valid and matches the expectations    |
+| `errorCodes`           | `list<string>`       | Error codes, including unknown ones Cloudflare might add   |
+| `challengedAt`         | `?DateTimeImmutable` | When the challenge was solved                              |
+| `hostname`             | `?string`            | Hostname of the site where the challenge was solved        |
+| `action`               | `?string`            | Action configured in the widget                            |
+| `cdata`                | `?string`            | Custom data configured in the widget                       |
+| `ephemeralId`          | `?string`            | Device identifier, only available for Enterprise customers |
+| `resultWithTestingKey` | `bool`               | Whether the token was verified with a test secret key      |
 
 Use `hasErrorCode()` to check for a specific error:
 
@@ -163,7 +164,7 @@ Cloudflare provides [test keys](https://developers.cloudflare.com/turnstile/trou
 | `2x0000000000000000000000000000000AA` | Always fails                          |
 | `3x0000000000000000000000000000000AA` | Fails with `timeout-or-duplicate`     |
 
-With these secret keys you can use the dummy token `XXXX.DUMMY.TOKEN.XXXX`.
+With these secret keys you can use the dummy token `XXXX.DUMMY.TOKEN.XXXX`. The expected hostname and action are not checked, so the same configuration works in development and production.
 
 ## License
 

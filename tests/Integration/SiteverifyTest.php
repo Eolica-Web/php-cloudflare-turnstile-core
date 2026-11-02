@@ -32,7 +32,9 @@ it('passes with the always passing test secret key', function (): void {
         ->and($response->challengedAt)
         ->toBeInstanceOf(DateTimeImmutable::class)
         ->and($response->hostname)
-        ->toBeString();
+        ->toBeString()
+        ->and($response->resultWithTestingKey)
+        ->toBeTrue();
 });
 
 it('fails with the failing test secret keys', function (
@@ -48,12 +50,13 @@ it('fails with the failing test secret keys', function (
     'token already spent' => ['3x0000000000000000000000000000000AA', ErrorCode::TimeoutOrDuplicate],
 ]);
 
-it('fails when the hostname does not match the expected one', function (): void {
+it('skips the hostname and action checks with the test secret keys', function (): void {
     $response = cloudflareTurnstile('1x0000000000000000000000000000000AA')
         ->withExpectedHostname('expected.invalid')
+        ->withExpectedAction('login')
         ->verify(TOKEN);
 
-    expect($response->success)->toBeFalse()->and($response->errorCodes)->toBe([ErrorCode::HostnameMismatch->value]);
+    expect($response->success)->toBeTrue()->and($response->errorCodes)->toBe([]);
 });
 
 it('throws with the error code when the secret key is invalid', function (

@@ -124,7 +124,7 @@ final readonly class TurnstileClient
 
     private function checkExpectations(VerifyResponse $response): VerifyResponse
     {
-        if (!$response->success) {
+        if (!$response->success || $response->resultWithTestingKey) {
             return $response;
         }
 

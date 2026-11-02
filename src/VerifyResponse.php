@@ -23,6 +23,7 @@ final readonly class VerifyResponse
         public ?string $action = null,
         public ?string $cdata = null,
         public ?string $ephemeralId = null,
+        public bool $resultWithTestingKey = false,
     ) {}
 
     /**
@@ -54,6 +55,7 @@ final readonly class VerifyResponse
             action: self::optionalString($data, 'action'),
             cdata: self::optionalString($data, 'cdata'),
             ephemeralId: self::optionalString($metadata, 'ephemeral_id', 'metadata.ephemeral_id'),
+            resultWithTestingKey: self::parseResultWithTestingKey($metadata),
         );
     }
 
@@ -114,6 +116,20 @@ final readonly class VerifyResponse
         }
 
         return $challengedAt;
+    }
+
+    /**
+     * @param array<mixed> $metadata
+     */
+    private static function parseResultWithTestingKey(array $metadata): bool
+    {
+        $resultWithTestingKey = $metadata['result_with_testing_key'] ?? false;
+
+        if (!is_bool($resultWithTestingKey)) {
+            throw InvalidResponseException::invalidField('metadata.result_with_testing_key');
+        }
+
+        return $resultWithTestingKey;
     }
 
     /**
